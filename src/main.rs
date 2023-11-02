@@ -1,6 +1,7 @@
 use rand::Rng;
 use std::error::Error;
 use std::result::Result;
+use std::sync::mpsc;
 use std::time::Instant;
 use std::thread;
 
@@ -59,27 +60,39 @@ impl PointsSet {
         }
     }
 
-    pub fn generate_random_points(total: f32) -> PointsSet {
-        let mut i:f32 = 0.0;
-        let mut rng = rand::thread_rng();
-        let mut input: Vec<Point> = Vec::new();
-        while i < total {
-            let new_point = Point::new(
-                rng.gen_range(1..=1000) as f32,
-                rng.gen_range(1..=1000) as f32,
-            );
-            input.push(new_point);
-            i = i + 1.0
+    pub fn generate_random_points(total: f32, threads: i32) -> PointsSet {
+        let points_per_thread = (total / threads as f32).ceil() as usize;
+        let (tx, rx): (mpsc::Sender<Vec<Point>>, mpsc::Receiver<Vec<Point>>) = mpsc::channel();
+
+        for _ in 0..threads{
+            let tx = tx.clone();
+            thread::spawn(move || {
+            let mut rng = rand::thread_rng();
+            let mut points: Vec<Point> = Vec::new();
+            for _ in 0..points_per_thread {
+                let new_point = Point::new(
+                    rng.gen_range(1..=1000) as f32,
+                    rng.gen_range(1..=1000) as f32,
+                );
+                points.push(new_point);
+            }
+            tx.send(points).unwrap();
+        });
         }
-        let points_set = PointsSet::new(input);
-        points_set
+        let mut combined_points: Vec<Point> = Vec::new();
+        for _ in 0..threads {
+            let thread_points = rx.recv().unwrap();
+            combined_points.extend(thread_points);
+        }
+    
+        PointsSet::new(combined_points)
     }
 }
 
 fn main() {
     println!("Started generating random points");
     let start_time = Instant::now();
-    let points = PointsSet::generate_random_points(100000.0);
+    let points = PointsSet::generate_random_points(100000.0, 4);
     let duration = start_time.elapsed();
     println!("Took {:?} to generate points", duration);
     println!("Started to calculate");
