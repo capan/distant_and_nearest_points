@@ -2,7 +2,7 @@ use rand::Rng;
 use std::error::Error;
 use std::result::Result;
 use std::time::Instant;
-use std::thread;
+use std::io;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Point {
@@ -30,7 +30,9 @@ impl PointsSet {
     pub fn new(points: Vec<Point>) -> PointsSet {
         PointsSet { points }
     }
-    pub fn find_closest_and_farthest(&self) -> Result<((Point, Point), (Point, Point)), Box<dyn Error>> {
+    pub fn find_closest_and_farthest(
+        &self,
+    ) -> Result<((Point, Point), (Point, Point)), Box<dyn Error>> {
         if self.points.len() < 2 {
             return Err(Box::new(std::io::Error::new(
                 std::io::ErrorKind::InvalidData,
@@ -55,12 +57,12 @@ impl PointsSet {
                     }
                 }
             }
-            Ok((most_distant_points,closest_points))
+            Ok((most_distant_points, closest_points))
         }
     }
 
     pub fn generate_random_points(total: f32) -> PointsSet {
-        let mut i:f32 = 0.0;
+        let mut i: f32 = 0.0;
         let mut rng = rand::thread_rng();
         let mut input: Vec<Point> = Vec::new();
         while i < total {
@@ -77,9 +79,18 @@ impl PointsSet {
 }
 
 fn main() {
+    let mut input = String::new();
+    println!("How many points should be generated?");
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+    let input_number: f32 = match input.trim().parse() {
+        Ok(num) => num,
+        Err(_) => 0.0,
+    };
     println!("Started generating random points");
     let start_time = Instant::now();
-    let points = PointsSet::generate_random_points(100000.0);
+    let points = PointsSet::generate_random_points(input_number);
     let duration = start_time.elapsed();
     println!("Took {:?} to generate points", duration);
     println!("Started to calculate");
