@@ -41,11 +41,16 @@ impl PointsSet {
             )));
         }
 
-        let num_threads = num_cpus::get();
+        // let num_threads = num_cpus::get();
+        let num_threads = 4;
         let points = Arc::new(self.points.clone());
 
         for i in 0..num_threads {
-            
+            thread::spawn(|| {
+                for _n in 1..10 {
+                    println!("Thread 1: Hello {0}!", _n)
+                }
+            });
         }
         
         let mut most_distant_points = (self.points[0], self.points[1]);
