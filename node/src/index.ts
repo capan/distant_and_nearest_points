@@ -46,7 +46,7 @@ const inputGen = (totalNumber: number) => {
     return input
 }
 
-const totalInputs = 1000000;
+const totalInputs = 100000;
 
 console.time("InputGen");
 const input = inputGen(totalInputs);

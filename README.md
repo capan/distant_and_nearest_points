@@ -19,4 +19,18 @@ Let's say you have a list of random X,Y coordinates. Find closest and farthest t
 
 `npm run start`
 
+### Go implementation
+
+`cd go`
+
+`go run .`
+
 Adjust numbers to be created. 
+
+Latest results on MacBook M1 for 100K points;
+
+| Lang    | Input Generation | Output Calculation Time |
+| --------- | ------- | ------- |
+|  Node         |   ~9ms      | ~19 s |
+|   Rust        |     ~5ms    |  ~13 s |
+|      Go     |   ~10ms      | ~10 s|
